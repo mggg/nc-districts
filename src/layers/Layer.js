@@ -48,6 +48,7 @@ export default class Layer {
      */
     constructor(map, layer, adder) {
         this.map = map;
+        this.layer = layer;
         this.id = layer.id;
         this.sourceId = layer.source;
         this.type = layer.type;
@@ -55,11 +56,23 @@ export default class Layer {
 
         if (adder) {
             adder(map, layer);
-        } else {
+        } else if (map) {
             map.addLayer(layer);
         }
 
         this.getFeature = this.getFeature.bind(this);
+    }
+    addToMap(map) {
+      if (map && !this.map) {
+        this.map = map;
+        map.addLayer(this.layer);
+      }
+    }
+    remove() {
+      if (this.map) {
+        this.map.removeLayer(this.id);
+        this.map = null;
+      }
     }
     setOpacity(opacity, isText) {
         this.setPaintProperty(`${isText ? "text" : this.type.replace("symbol", "icon")}-opacity`, opacity);

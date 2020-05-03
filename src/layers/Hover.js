@@ -59,11 +59,12 @@ export class Hover {
 }
 
 export class HoverWithRadius extends Hover {
-    constructor(layer, radius) {
+    constructor(layer, radius, setMapSelection) {
         super(layer);
 
         this.radius = radius;
         this.hoveredFeatures = [];
+        this.setMapSelection = setMapSelection;
     }
     hoverOff() {
         this.hoveredFeatures.forEach(feature => {
@@ -74,6 +75,7 @@ export class HoverWithRadius extends Hover {
             });
         });
         this.hoveredFeatures = [];
+        this.setMapSelection(this.hoveredFeatures);
     }
     hoverOn(features) {
         this.hoveredFeatures = features;
@@ -85,6 +87,7 @@ export class HoverWithRadius extends Hover {
                 });
             });
         }
+        this.setMapSelection(this.hoveredFeatures);
     }
     onMouseMove(e) {
         const box = boxAround(e.point, this.radius);

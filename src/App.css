@@ -43,7 +43,35 @@ section {
 .legend .options {
   border-right: 1px solid #000;
 }
+.legend .nav {
+  display: block;
+}
+.legend li {
+  margin-bottom: 8px;
+  cursor: pointer;
+}
 .legend .options, .legend .outputs {
   display: inline-block;
   padding: 8px;
+  vertical-align: top;
+}
+
+.histogram div {
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+td.digits {
+  text-align: right;
+}
+
+.colorList li {
+  list-style-type: none;
+}
+.colorList li span {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  vertical-align: middle;
+  display: inline-block;
 }
