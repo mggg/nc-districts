@@ -3,6 +3,7 @@ import React from 'react'
 // UI components
 import ChooseLayers from '../components/ChooseLayers'
 import AgeHistogram from '../components/AgeHistogram'
+import IncomeHistogram from '../components/IncomeHistogram'
 import ElectionTable from '../components/ElectionTable'
 import EnvLegend from '../components/EnvLegend'
 import MedLegend from '../components/MedLegend'
@@ -21,6 +22,14 @@ const dataLayers = [
     units: "blockgroups",
   },
   {
+    name: "Income",
+    units: "blockgroups",
+  },
+  {
+    name: "Race",
+    units: "precincts",
+  },
+  {
     name: "Elections",
     units: "precincts",
   },
@@ -28,14 +37,10 @@ const dataLayers = [
     name: "Environment",
     units: "points"
   },
-  {
-    name: "Food",
-    units: "tracts"
-  },
-  {
-    name: "Race",
-    units: "precincts",
-  },
+  // {
+  //   name: "Food",
+  //   units: "tracts"
+  // },
   {
     name: "Colleges",
     units: "points"
@@ -316,6 +321,7 @@ export default class Map extends React.Component {
           Units: {this.state.currentUnitLayer}
           <br/>
           {activeLayer === "Age" ? <AgeHistogram selected={this.state.mapSelection}/> : null}
+          {activeLayer === "Income" ? <IncomeHistogram selected={this.state.mapSelection}/> : null}
           {activeLayer === "Elections" ? <ElectionTable selected={this.state.mapSelection}/> : null}
           {activeLayer === "Environment" ? <EnvLegend selected={this.state.mapSelection}/> : null}
           {activeLayer === "Hospitals" ? <MedLegend selected={this.state.mapSelection}/> : null}
