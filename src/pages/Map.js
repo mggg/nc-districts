@@ -264,16 +264,14 @@ export default class Map extends React.Component {
   }
 
   switchLayer(layer_id) {
-    // if (this.state.currentLayer.layer) {
-    //   this.map.removeLayer(this.state.currentLayer.layer);
-    // }
     let selectLayer = dataLayers[layer_id];
-    if (selectLayer.units === "points") {
-      if (dataLayers[this.state.currentColorLayer].units === "points") {
-        // remove current point layer
-        this.state.pointLayers[dataLayers[this.state.currentColorLayer].name].remove()
-      }
 
+    if (dataLayers[this.state.currentColorLayer].units === "points") {
+      // remove current point layer
+      this.state.pointLayers[dataLayers[this.state.currentColorLayer].name].remove()
+    }
+
+    if (selectLayer.units === "points") {
       this.state.pointLayers[selectLayer.name].addToMap(this.map)
       this.setState({
         currentColorLayer: layer_id
