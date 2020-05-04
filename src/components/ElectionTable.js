@@ -29,6 +29,9 @@ export function ElectionTable(props) {
   }
 
   return <div>
+    <span>Layer: Vote Partisanship</span>
+    <p>Source: MGGG, North Carolina General Assembly, National Historic GIS (NHGIS)</p>
+    <br/>
     <select value={props.selectedElection} onChange={props.changeElection}>
       {elections.map((e, i) =>
         <option key={i} value={i}>{e[0] + " " + e[1]}</option>

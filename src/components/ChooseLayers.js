@@ -20,19 +20,21 @@ export default class ChooseLayers extends React.Component {
   }
 
   render () {
-    return <ul className="nav nav-pills">
-      {this.props.labels.map((label, i) =>
-        <li className="nav-item" key={i}>
-          <a
-            className={"nav-link " +
-              ((i === this.state.selectItem) ? "active" : "")}
-            href="#"
-            onClick={(e) => { this.clickTest(e, i) }}
-          >
-            {label.name}
-          </a>
-        </li>)
-      }
-    </ul>
+    return <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
+      <ul className="navbar-nav mr-auto">
+        {this.props.labels.map((label, i) =>
+          <li className="nav-item" key={i}>
+            <a
+              className={"nav-link " +
+                ((i === this.state.selectItem) ? "active" : "")}
+              href="#"
+              onClick={(e) => { this.clickTest(e, i) }}
+            >
+              {label.name}
+            </a>
+          </li>)
+        }
+      </ul>
+    </nav>
   }
 }

@@ -19,39 +19,37 @@
 }
 
 body {
-font-family: "Lora", Georgia, serif; /* "Source Sans Pro", sans-serif; */
+/* font-family: "Lora", Georgia, serif;  */
+/* "Source Sans Pro", sans-serif; */
   text-align: center;
   font-size: 120%;
   line-height: 150%;
 }
 
-section {
-  width: 60%;
-  margin-left: 20%;
+html, body, #root, .App, section {
+  height: 100%;
 }
 
+/* section {
+  width: 60%;
+  margin-left: 20%;
+} */
+
 .map {
-  height: 400px;
-  width: 100%;
+  height: 100%;
+  width: 50%;
+  float: left;
 }
 
 .legend {
   text-align: left;
-  border: 1px solid #000;
-  border-top: none;
-}
-.legend .options {
-  border-right: 1px solid #000;
+  width: 48%;
+  float: right;
 }
 .legend .nav {
   display: block;
 }
-.legend li {
-  margin-bottom: 8px;
-  cursor: pointer;
-}
-.legend .options, .legend .outputs {
-  display: inline-block;
+.legend .outputs {
   padding: 8px;
   vertical-align: top;
 }
@@ -83,6 +81,11 @@ td.digits {
   text-align: center;
 }
 
+.gradient {
+  width: 300px;
+  margin-left: 5px;
+  height: 24px;
+}
 .palette .square {
   width: 36px;
   height: 24px;

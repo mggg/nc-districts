@@ -47,6 +47,7 @@ export default function AgeHistogram(props) {
   })
 
   return <div>
+    <span>Layer: Median Age</span>
     <div className="palette">
       {ageColors.filter(c => c[0] === "case").map((color, i) =>
         <div className="square" key={i} style={{background: color[3]}}>
@@ -77,8 +78,13 @@ export default function AgeHistogram(props) {
         </div>
       })}
     </div>
-    <small>Youngest to Oldest</small>
-    <br/>
-    <span>Median: {median_age ? median_age.toFixed(1) : "N/A"}</span>
+    {cols.length
+      ? <div>
+        <small>Youngest to Oldest</small>
+        <br/>
+        <span>Median: {median_age ? median_age.toFixed(1) : "N/A"}</span>
+      </div>
+      : null
+    }
   </div>
 }

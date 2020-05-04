@@ -112,6 +112,20 @@ const partyRGBColors = {
   ],
 };
 
+export function densityColors(demoGroup) {
+  return ["case",
+    ["==", ["get", "TOTPOP"], 0],
+      "#ccc", // no data
+      [
+        "interpolate",
+        ["linear"],
+        ["/", ["get", demoGroup[1]], ["get", "TOTPOP"]],
+        ...[0, "rgba(200, 200, 255, 0)",
+        (demoGroup[2] + 0.01), "rgba(0, 0, 255, 0.6)"]
+      ]
+  ]
+}
+
 export function electionColors(demKey, repKey) {
   return [
     "case",

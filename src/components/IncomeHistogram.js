@@ -58,6 +58,7 @@ export default function IncomeHistogram(props) {
   }
 
   return <div>
+    <span>Layer: Median Household Income</span>
     <div className="palette">
       {incomeColors.filter(c => c[0] === "case").map((color, i) =>
         <div className="square" key={i} style={{background: color[3]}}>
@@ -88,10 +89,15 @@ export default function IncomeHistogram(props) {
         </div>
       })}
     </div>
-    <small>Least to Most</small>
-    <br/>
-    {median_name ?
-      <span>Median: {median_name.replace("age_", "").replace("_", " – ")}</span>
+    {totals.length
+      ? <div>
+        <small>Least to Most</small>
+        <br/>
+        {median_name ?
+          <span>Median: {median_name.replace("age_", "").replace("_", " – ")}</span>
+          : null
+        }
+      </div>
       : null
     }
   </div>

@@ -5,6 +5,8 @@ export default function EnvLegend(props) {
 
 
   return <div>
+    <span>Layer: Colleges & Universities</span>
+    <br/>
     <span>Source: Homeland Infrastructure Foundation</span>
 
   </div>

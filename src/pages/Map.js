@@ -5,6 +5,7 @@ import ChooseLayers from '../components/ChooseLayers'
 import AgeHistogram from '../components/AgeHistogram'
 import IncomeHistogram from '../components/IncomeHistogram'
 import { elections, ElectionTable } from '../components/ElectionTable'
+import { raceGroups, RaceDataBrowser } from '../components/RaceDataBrowser'
 import EnvLegend from '../components/EnvLegend'
 import MedLegend from '../components/MedLegend'
 import UniLegend from '../components/UniLegend'
@@ -18,7 +19,8 @@ import {
   enviroPaint,
   ageColors,
   incomeColors,
-  electionColors
+  electionColors,
+  densityColors,
 } from '../colors'
 
 window.mapboxgl.accessToken = "pk.eyJ1IjoiZGlzdHJpY3RyIiwiYSI6ImNqbjUzMTE5ZTBmcXgzcG81ZHBwMnFsOXYifQ.8HRRLKHEJA0AismGk2SX2g";
@@ -34,7 +36,7 @@ const dataLayers = [
   },
   {
     name: "Race",
-    units: "precincts",
+    units: "blockgroups",
   },
   {
     name: "Elections",
@@ -80,7 +82,8 @@ export default class Map extends React.Component {
       pointLayers: {},
       mapSelection: [],
 
-      selectedElection: 0
+      selectedElection: 0,
+      focusRace: 0,
     }
   }
 
@@ -117,19 +120,36 @@ export default class Map extends React.Component {
       this.map.addControl(new window.mapboxgl.NavigationControl())
 
       // NC state outline
-      this.map.addSource('state_outline', {
-        type: "vector",
-        url: "mapbox://mapbox.hist-pres-election-state"
-      })
-      this.map.addLayer({
-        id: 'state_outline',
-        source: 'state_outline',
-        "source-layer": "historical_pres_elections_state",
-        type: 'line',
-        paint: {
-          'line-color': '#555',
-          'line-width': ["case", ["==", ["get", "state_abbrev"], "NC"], 1.5, 0]
-        }
+      // this.map.addSource('state_outline', {
+      //   type: "vector",
+      //   url: "mapbox://mapbox.hist-pres-election-state"
+      // })
+      // this.map.addLayer({
+      //   id: 'state_outline',
+      //   source: 'state_outline',
+      //   "source-layer": "historical_pres_elections_state",
+      //   type: 'line',
+      //   paint: {
+      //     'line-color': '#555',
+      //     'line-width': ["case", ["==", ["get", "state_abbrev"], "NC"], 1.5, 0]
+      //   }
+      // })
+
+      // NC congress outline
+      fetch("/nc-districts/nc-geo/current_districts.geojson").then(res => res.json()).then((gj) => {
+        this.map.addSource('districts', {
+          type: "geojson",
+          data: gj
+        })
+        new Layer(this.map, {
+          id: 'districts',
+          source: 'districts',
+          type: 'line',
+          paint: {
+            'line-color': '#555',
+            'line-width': 1.5
+          }
+        })
       })
 
       // NC precincts
@@ -283,6 +303,20 @@ export default class Map extends React.Component {
     this.setState({ selectedElection: newSelection })
   }
 
+  changeFocus(event) {
+    const newSelection = event
+            ? event.target.value
+            : this.state.focusRace,
+          newFocus = raceGroups[newSelection];
+
+    this.state.unitLayers.blockgroups.setPaintProperty(
+      "fill-color",
+      densityColors(newFocus)
+    )
+
+    this.setState({ focusRace: newSelection })
+  }
+
   paintAge() {
     this.state.unitLayers.blockgroups.setPaintProperty("fill-color", ageColors)
     this.state.unitLayers.blockgroups.setPaintProperty("fill-opacity", 0.4)
@@ -291,6 +325,14 @@ export default class Map extends React.Component {
   paintIncome() {
     this.state.unitLayers.blockgroups.setPaintProperty("fill-color", incomeColors)
     this.state.unitLayers.blockgroups.setPaintProperty("fill-opacity", 0.4)
+  }
+
+  paintRace() {
+    this.state.unitLayers.blockgroups.setPaintProperty(
+      "fill-color",
+      densityColors(raceGroups[this.state.focusRace])
+    )
+    this.state.unitLayers.blockgroups.setPaintProperty("fill-opacity", 0.6)
   }
 
   switchLayer(layer_id) {
@@ -331,6 +373,8 @@ export default class Map extends React.Component {
       this.paintAge()
     } else if (selectLayer.name === "Income") {
       this.paintIncome()
+    } else if (selectLayer.name === "Race") {
+      this.paintRace()
     } else if (selectLayer.name === "Elections") {
       this.changeElection()
     }
@@ -340,19 +384,17 @@ export default class Map extends React.Component {
     let activeLayer = dataLayers[this.state.currentColorLayer].name;
 
     return <>
+      <div className="options">
+        <ChooseLayers
+          labels={dataLayers}
+          switchLayer={this.switchLayer.bind(this)}
+          disabled={!this.state.mapLoaded}
+        />
+      </div>
       <div className="map" ref="map">
       </div>
       <div className="legend">
-        <div className="options">
-          <ChooseLayers
-            labels={dataLayers}
-            switchLayer={this.switchLayer.bind(this)}
-            disabled={!this.state.mapLoaded}
-          />
-        </div>
         <div className="outputs">
-          {activeLayer}
-          -
           Units: {this.state.currentUnitLayer}
           <br/>
           {activeLayer === "Age" ? <AgeHistogram selected={this.state.mapSelection}/> : null}
@@ -362,6 +404,13 @@ export default class Map extends React.Component {
               selected={this.state.mapSelection}
               selectedElection={this.state.selectedElection}
               changeElection={this.changeElection.bind(this)}
+              />
+            : null}
+          {activeLayer === "Race" ?
+            <RaceDataBrowser
+              selected={this.state.mapSelection}
+              focusRace={this.state.focusRace}
+              changeFocus={this.changeFocus.bind(this)}
               />
             : null}
           {activeLayer === "Environment" ? <EnvLegend selected={this.state.mapSelection}/> : null}

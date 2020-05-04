@@ -6,6 +6,8 @@ export default function EnvLegend(props) {
   let selected = props.selected;
 
   return <div>
+    <span>Layer: Environment</span>
+    <br/>
     <span>Source: North Carolina Department of Environmental Quality</span>
     <br/>
     <span>Environmental Map Key</span>
