@@ -98,42 +98,6 @@ export default class Layer {
             state
         );
     }
-    setCountyState(fips, countyProp, setState, filter, undoInfo, tallyListeners) {
-        let seenFeatures = new Set(),
-            filterStrings = [
-                "all",
-                ["has", countyProp]
-            ];
-        if (["COUNTY", "CTYNAME", "CNTYNAME", "COUNTYFP10", "cnty_nm", "locality"].includes(countyProp)) {
-            filterStrings.push(["==", ["get", countyProp], fips]);
-        } else {
-            filterStrings.push([">=", ["get", countyProp], fips]);
-            filterStrings.push(["<", ["get", countyProp], ((isNaN(fips * 1) || countyProp.toLowerCase().includes("name")) ? fips + "z" : String(Number(fips) + 1))]);
-        }
-        this.map.querySourceFeatures(this.sourceId, {
-            sourceLayer: this.sourceLayer,
-            filter: filterStrings
-        }).forEach(feature => {
-            if (!seenFeatures.has(feature.id)) {
-                seenFeatures.add(feature.id);
-                feature.state = this.getFeatureState(feature.id);
-                if (filter(feature)) {
-                    undoInfo[feature.id] = {
-                        properties: feature.properties,
-                        color: String(feature.state.color)
-                    };
-                    tallyListeners.forEach((listener) => {
-                        listener(feature, setState.color);
-                    });
-                    this.setFeatureState(feature.id, {
-                        ...feature.state,
-                        color: setState.color
-                    });
-                    feature.state.color = setState.color;
-                }
-            }
-        });
-    }
     setPaintProperty(name, value) {
         this.map.setPaintProperty(this.id, name, value);
     }

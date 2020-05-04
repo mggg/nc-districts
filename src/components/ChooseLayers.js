@@ -13,8 +13,10 @@ export default class ChooseLayers extends React.Component {
 
   clickTest (event, index) {
     event.preventDefault();
-    this.setState({ selectItem: index });
-    this.props.switchLayer(index);
+    if (!this.props.disabled) {
+      this.setState({ selectItem: index });
+      this.props.switchLayer(index);
+    }
   }
 
   render () {

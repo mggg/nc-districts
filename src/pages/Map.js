@@ -4,7 +4,7 @@ import React from 'react'
 import ChooseLayers from '../components/ChooseLayers'
 import AgeHistogram from '../components/AgeHistogram'
 import IncomeHistogram from '../components/IncomeHistogram'
-import ElectionTable from '../components/ElectionTable'
+import { elections, ElectionTable } from '../components/ElectionTable'
 import EnvLegend from '../components/EnvLegend'
 import MedLegend from '../components/MedLegend'
 import UniLegend from '../components/UniLegend'
@@ -65,11 +65,15 @@ export default class Map extends React.Component {
     super()
 
     this.state = {
+      mapLoaded: false,
+
       currentColorLayer: 0,
       currentUnitLayer: '',
       unitLayers: {},
       pointLayers: {},
-      mapSelection: []
+      mapSelection: [],
+
+      selectedElection: 0
     }
   }
 
@@ -256,7 +260,8 @@ export default class Map extends React.Component {
           precincts: fillPrecincts,
           precincts_border: borderPrecincts,
           precincts_cursor: cursorPrecincts
-        }
+        },
+        mapLoaded: true
       })
 
     })
@@ -268,6 +273,61 @@ export default class Map extends React.Component {
     })
   }
 
+  changeElection(event) {
+    const newSelection = event.target.value,
+          newElection = elections[newSelection];
+
+    const partyRGBColors = {
+      Democratic: [
+          0,
+          "rgba(0,0,0,0)",
+          0.499,
+          "rgba(0,0,0,0)",
+          0.5,
+          "rgba(249,249,249,0)",
+          1,
+          "rgb(25, 118, 210)"
+      ],
+      Republican: [
+          0,
+          "rgba(0,0,0,0)",
+          0.499,
+          "rgba(0,0,0,0)",
+          0.5,
+          "rgba(249,249,249,0)",
+          1,
+          "rgb(211, 47, 47)"
+      ]
+    };
+    // function colorByFraction(subgroup) {
+    //     const rgb = partyRGBColors[subgroup.name];
+    //     return ["rgba", ...rgb, ["/", ["get", this.key], ["get", this.key]]];
+    // }
+
+    // also need feature to trigger this when elections are first loaded
+    this.state.unitLayers.precincts.setPaintProperty(
+      "fill-color",
+      [
+        "case",
+        [">", ["get", newElection[2]], ["get", newElection[3]]],
+          [
+              "interpolate",
+              ["linear"],
+              ["/", ["get", newElection[2]], ["+", ["get", newElection[2]], ["get", newElection[3]]]],
+              ...partyRGBColors["Democratic"]
+          ],
+          [
+              "interpolate",
+              ["linear"],
+              ["/", ["get", newElection[3]], ["+", ["get", newElection[2]], ["get", newElection[3]]]],
+              ...partyRGBColors["Republican"]
+          ]
+      ]
+    )
+
+    this.setState({ selectedElection: newSelection })
+  }
+
   switchLayer(layer_id) {
     let selectLayer = dataLayers[layer_id];
 
@@ -277,12 +337,13 @@ export default class Map extends React.Component {
     }
 
     if (selectLayer.units === "points") {
+      // points file
       this.state.pointLayers[selectLayer.name].addToMap(this.map)
       this.setState({
         currentColorLayer: layer_id
       })
     } else if (selectLayer.units === this.state.currentUnitLayer) {
-      console.log('same units')
+      // same units
       this.setState({
         currentColorLayer: layer_id
       })
@@ -313,6 +374,7 @@ export default class Map extends React.Component {
           <ChooseLayers
             labels={dataLayers}
             switchLayer={this.switchLayer.bind(this)}
+            disabled={!this.state.mapLoaded}
           />
         </div>
         <div className="outputs">
@@ -322,7 +384,13 @@ export default class Map extends React.Component {
           <br/>
           {activeLayer === "Age" ? <AgeHistogram selected={this.state.mapSelection}/> : null}
           {activeLayer === "Income" ? <IncomeHistogram selected={this.state.mapSelection}/> : null}
-          {activeLayer === "Elections" ? <ElectionTable selected={this.state.mapSelection}/> : null}
+          {activeLayer === "Elections" ?
+            <ElectionTable
+              selected={this.state.mapSelection}
+              selectedElection={this.state.selectedElection}
+              changeElection={this.changeElection.bind(this)}
+              />
+            : null}
           {activeLayer === "Environment" ? <EnvLegend selected={this.state.mapSelection}/> : null}
           {activeLayer === "Hospitals" ? <MedLegend selected={this.state.mapSelection}/> : null}
           {activeLayer === "Colleges" ? <UniLegend selected={this.state.mapSelection}/> : null}
