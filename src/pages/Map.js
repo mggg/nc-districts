@@ -12,7 +12,14 @@ import UniLegend from '../components/UniLegend'
 // map management
 import Layer from '../layers/Layer'
 import { HoverWithRadius } from '../layers/Hover'
-import { changeColorLuminance, getUnitColorProperty } from '../colors'
+import {
+  changeColorLuminance,
+  getUnitColorProperty,
+  enviroPaint,
+  ageColors,
+  incomeColors,
+  electionColors
+} from '../colors'
 
 window.mapboxgl.accessToken = "pk.eyJ1IjoiZGlzdHJpY3RyIiwiYSI6ImNqbjUzMTE5ZTBmcXgzcG81ZHBwMnFsOXYifQ.8HRRLKHEJA0AismGk2SX2g";
 
@@ -191,7 +198,7 @@ export default class Map extends React.Component {
       cursorBGs.activate()
 
       // NC environment
-      fetch("./nc-geo/nc_industry.geojson").then(res => res.json()).then(gj => {
+      fetch("/nc-districts/nc-geo/nc_industry.geojson").then(res => res.json()).then(gj => {
         this.map.addSource('enviro', {
           type: "geojson",
           data: gj
@@ -200,25 +207,12 @@ export default class Map extends React.Component {
           id: 'enviro',
           source: 'enviro',
           type: 'circle',
-          paint: {
-            'circle-radius': 4,
-            'circle-color': [
-              'match',
-              ['get', 'CLASS_STATUS'],
-              'Title V', 'purple',
-              'Synthetic Minor', 'green',
-              'Small', 'red',
-              'Permit Exempt', 'blue',
-              'Registered', 'orange',
-              'Permit/Registration Pending', 'yellow',
-              '#ccc' // other
-            ]
-          }
+          paint: enviroPaint
         })
       })
 
       // NC colleges
-      fetch("./nc-geo/nc_colleges.geojson").then(res => res.json()).then(gj => {
+      fetch("/nc-districts/nc-geo/nc_colleges.geojson").then(res => res.json()).then(gj => {
         this.map.addSource('colleges', {
           type: "geojson",
           data: gj
@@ -235,7 +229,7 @@ export default class Map extends React.Component {
       })
 
       // NC hospitals
-      fetch("./nc-geo/nc_hospitals.geojson").then(res => res.json()).then(gj => {
+      fetch("/nc-districts/nc-geo/nc_hospitals.geojson").then(res => res.json()).then(gj => {
         this.map.addSource('hospitals', {
           type: "geojson",
           data: gj
@@ -280,112 +274,22 @@ export default class Map extends React.Component {
             : this.state.selectedElection,
           newElection = elections[newSelection];
 
-    const partyRGBColors = {
-      Democratic: [
-        0, "rgba(0,0,0,0)",
-        0.499, "rgba(0,0,0,0)",
-        0.5, "rgba(249,249,249,0)",
-        1, "rgb(25, 118, 210)" // 0x1976d2
-      ],
-      Democratic_hover: [
-        0, "rgba(0,0,0,0)",
-        0.499, "rgba(0,0,0,0)",
-        0.5, "rgba(174,174,174,0.5)",
-        1, "rgb(18, 83, 147)"
-      ],
-      Republican: [
-        0, "rgba(0,0,0,0)",
-        0.499, "rgba(0,0,0,0)",
-        0.5, "rgba(249,249,249,0)",
-        1, "rgb(211, 47, 47)" // 0xd32f2f
-      ],
-      Republican_hover: [
-        0, "rgba(0,0,0,0)",
-        0.499, "rgba(0,0,0,0)",
-        0.5, "rgba(174,174,174,0.5)",
-        1, "rgb(148, 33, 33)"
-      ],
-    };
-
     // also need feature to trigger this when elections are first loaded
     this.state.unitLayers.precincts.setPaintProperty(
       "fill-color",
-      [
-        "case",
-        [">", ["get", newElection[2]], ["get", newElection[3]]],
-          ["case",
-            ["==", ["feature-state", "hover"], true],
-            [
-                "interpolate",
-                ["linear"],
-                ["/", ["get", newElection[2]], ["+", ["get", newElection[2]], ["get", newElection[3]]]],
-                ...partyRGBColors["Democratic_hover"],
-            ],
-            [
-                "interpolate",
-                ["linear"],
-                ["/", ["get", newElection[2]], ["+", ["get", newElection[2]], ["get", newElection[3]]]],
-                ...partyRGBColors["Democratic"],
-            ]
-          ],
-          ["case",
-            ["==", ["feature-state", "hover"], true],
-            [
-                "interpolate",
-                ["linear"],
-                ["/", ["get", newElection[3]], ["+", ["get", newElection[2]], ["get", newElection[3]]]],
-                ...partyRGBColors["Republican_hover"],
-            ],
-            [
-                "interpolate",
-                ["linear"],
-                ["/", ["get", newElection[3]], ["+", ["get", newElection[2]], ["get", newElection[3]]]],
-                ...partyRGBColors["Republican"],
-            ]
-          ]
-      ]
+      electionColors(newElection[2], newElection[3])
     )
 
     this.setState({ selectedElection: newSelection })
   }
 
   paintAge() {
-    this.state.unitLayers.blockgroups.setPaintProperty(
-      "fill-color",
-      ["case",
-        ["<", ["get", "B01002_001"], 20],
-        "#edf8fb",
-        ["<", ["get", "B01002_001"], 35],
-        "#ccece6",
-        ["<", ["get", "B01002_001"], 50],
-        "#99d8c9",
-        ["<", ["get", "B01002_001"], 65],
-        "#66c2a4",
-        ["<", ["get", "B01002_001"], 80],
-        "#2ca25f",
-        "#006d2c",
-      ]
-    )
+    this.state.unitLayers.blockgroups.setPaintProperty("fill-color", ageColors)
     this.state.unitLayers.blockgroups.setPaintProperty("fill-opacity", 0.4)
   }
 
   paintIncome() {
-    this.state.unitLayers.blockgroups.setPaintProperty(
-      "fill-color",
-      ["case",
-        ["<", ["get", "B19013_001"], 30000],
-        "#edf8fb",
-        ["<", ["get", "B19013_001"], 60000],
-        "#ccece6",
-        ["<", ["get", "B19013_001"], 90000],
-        "#99d8c9",
-        ["<", ["get", "B19013_001"], 120000],
-        "#66c2a4",
-        ["<", ["get", "B19013_001"], 150000],
-        "#2ca25f",
-        "#006d2c"
-      ]
-    )
+    this.state.unitLayers.blockgroups.setPaintProperty("fill-color", incomeColors)
     this.state.unitLayers.blockgroups.setPaintProperty("fill-opacity", 0.4)
   }
 

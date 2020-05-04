@@ -75,3 +75,21 @@ td.digits {
   vertical-align: middle;
   display: inline-block;
 }
+
+.nums .square {
+  display: inline-block;
+  font-size: 10px;
+  width: 36px;
+  text-align: center;
+}
+
+.palette .square {
+  width: 36px;
+  height: 24px;
+  display: inline-block;
+  border: 1px solid silver;
+  border-right: none;
+}
+.palette .square:last-child {
+  border-right: 1px solid silver;
+}

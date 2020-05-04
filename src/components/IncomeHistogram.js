@@ -1,5 +1,9 @@
 import React from 'react'
 
+import {
+  incomeColors
+} from '../colors'
+
 export default function IncomeHistogram(props) {
   let totals = [],
       keys = [],
@@ -54,6 +58,24 @@ export default function IncomeHistogram(props) {
   }
 
   return <div>
+    <div className="palette">
+      {incomeColors.filter(c => c[0] === "case").map((color, i) =>
+        <div className="square" key={i} style={{background: color[3]}}>
+        </div>
+      )}
+    </div>
+    <div className="nums">
+      {incomeColors.filter(c => c[0] === "<").map((color, i) =>
+        <div className="square" key={i}>
+          {i ? "" : "< "}
+          {Math.floor(color[2] / 1000)}k
+        </div>
+      )}
+      <div className="square">
+        > {Math.floor(incomeColors[incomeColors.length - 3][2] / 1000)}k
+      </div>
+    </div>
+
     <span>Source: US Census ACS (2018)</span>
     <div className="histogram">
       {totals.map((c, kdex) => {

@@ -1,5 +1,9 @@
 import React from 'react'
 
+import {
+  ageColors
+} from '../colors'
+
 export default function AgeHistogram(props) {
   let totals = {},
       keys = [],
@@ -43,6 +47,24 @@ export default function AgeHistogram(props) {
   })
 
   return <div>
+    <div className="palette">
+      {ageColors.filter(c => c[0] === "case").map((color, i) =>
+        <div className="square" key={i} style={{background: color[3]}}>
+        </div>
+      )}
+    </div>
+    <div className="nums">
+      {ageColors.filter(c => c[0] === "<").map((color, i) =>
+        <div className="square" key={i}>
+          {i ? "" : "< "}
+          {color[2]}
+        </div>
+      )}
+      <div className="square">
+        > {ageColors[ageColors.length - 3][2]}
+      </div>
+    </div>
+
     <span>Source: US Census ACS (2018)</span>
     <div className="histogram">
       {cols.map((c, kdex) => {
