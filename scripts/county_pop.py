@@ -186,22 +186,25 @@ for county in county_fips:
 # Household income
 for county in county_fips:
     cols = [
-        "B19001_002E", # < 10k
-        "B19001_003E", # 10-14.999k
-        "B19001_004E", # 15-20
-        "B19001_005E", # 20-25
-        "B19001_006E", # 25-30
-        "B19001_007E", # 30-35
-        "B19001_008E", # 35-40
-        "B19001_009E", # 40-45
-        "B19001_010E", # 45-50
-        "B19001_011E", # 50-60
-        "B19001_012E", # 60-75
-        "B19001_013E", # 75-100
-        "B19001_014E", # 100-125
-        "B19001_015E", # 125-150
-        "B19001_016E", # 150-200
-        "B19001_017E", # 200k+
+        # "B19001_002E", # < 10k
+        # "B19001_003E", # 10-14.999k
+        # "B19001_004E", # 15-20
+        # "B19001_005E", # 20-25
+        # "B19001_006E", # 25-30
+        # "B19001_007E", # 30-35
+        # "B19001_008E", # 35-40
+        # "B19001_009E", # 40-45
+        # "B19001_010E", # 45-50
+        # "B19001_011E", # 50-60
+        # "B19001_012E", # 60-75
+        # "B19001_013E", # 75-100
+        # "B19001_014E", # 100-125
+        # "B19001_015E", # 125-150
+        # "B19001_016E", # 150-200
+        # "B19001_017E", # 200k+
+
+        ## "B01002_001E", # median age
+        ## "B19013_001E", # median household income
     ]
 
     url = 'https://api.census.gov/data/2018/acs/acs5?get=' + ','.join(cols) + '&for=block group:*&in=state:' + state + '+county:' + county + '&key=' + api_key
@@ -219,7 +222,7 @@ for county in county_fips:
             saveblocks[blockid] = {}
             for bvar in cols:
                 realvar = bvar.replace('E', '')
-                saveblocks[blockid][realvar] = int(block[headers.index(bvar)])
+                saveblocks[blockid][realvar] = float(block[headers.index(bvar)])
     time.sleep(1)
 
 driver = ogr.GetDriverByName('ESRI Shapefile')
@@ -230,10 +233,10 @@ for item in saveblocks.keys():
     fields = saveblocks[item].keys()
     break
 
-# print('creating columns')
-# for field in fields:
-#     fldDef = ogr.FieldDefn(field, ogr.OFTInteger)
-#     layer.CreateField(fldDef)
+print('creating columns')
+for field in fields:
+    fldDef = ogr.FieldDefn(field, ogr.OFTInteger)
+    layer.CreateField(fldDef)
 
 print('setting columns')
 feature = layer.GetNextFeature()

@@ -5,7 +5,7 @@ export default function AgeHistogram(props) {
       keys = [],
       selected = props.selected,
       median_point = "",
-      median_name = "",
+      median_age = 0,
       col_max_height = 0
 
   if (selected.length) {
@@ -19,7 +19,9 @@ export default function AgeHistogram(props) {
     selected.forEach((blockgroup) => {
       keys.forEach(k => totals[k] += blockgroup.properties[k])
       tot_pop += blockgroup.properties.TOTPOP
+      median_age += blockgroup.properties.TOTPOP * blockgroup.properties.B01002_001
     })
+    median_age /= tot_pop
 
     let median_pop = tot_pop / 2;
     keys.forEach((k, kdex) => {
@@ -27,7 +29,6 @@ export default function AgeHistogram(props) {
         median_pop -= totals[k]
         if (median_pop <= 0) {
           median_point = kdex
-          median_name = k
         }
       }
     })
@@ -42,6 +43,7 @@ export default function AgeHistogram(props) {
   })
 
   return <div>
+    <span>Source: US Census ACS (2018)</span>
     <div className="histogram">
       {cols.map((c, kdex) => {
         let is_median = (kdex === median_point);
@@ -55,9 +57,6 @@ export default function AgeHistogram(props) {
     </div>
     <small>Youngest to Oldest</small>
     <br/>
-    {median_name ?
-      <span>Median: {median_name.replace("age_", "").replace("_", " – ")}</span>
-      : null
-    }
+    <span>Median: {median_age ? median_age.toFixed(1) : "N/A"}</span>
   </div>
 }

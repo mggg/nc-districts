@@ -263,6 +263,7 @@ export default class Map extends React.Component {
         },
         mapLoaded: true
       })
+      this.paintAge()
 
     })
   }
@@ -274,35 +275,37 @@ export default class Map extends React.Component {
   }
 
   changeElection(event) {
-    const newSelection = event.target.value,
+    const newSelection = event
+            ? event.target.value
+            : this.state.selectedElection,
           newElection = elections[newSelection];
 
     const partyRGBColors = {
       Democratic: [
-          0,
-          "rgba(0,0,0,0)",
-          0.499,
-          "rgba(0,0,0,0)",
-          0.5,
-          "rgba(249,249,249,0)",
-          1,
-          "rgb(25, 118, 210)"
+        0, "rgba(0,0,0,0)",
+        0.499, "rgba(0,0,0,0)",
+        0.5, "rgba(249,249,249,0)",
+        1, "rgb(25, 118, 210)" // 0x1976d2
+      ],
+      Democratic_hover: [
+        0, "rgba(0,0,0,0)",
+        0.499, "rgba(0,0,0,0)",
+        0.5, "rgba(174,174,174,0.5)",
+        1, "rgb(18, 83, 147)"
       ],
       Republican: [
-          0,
-          "rgba(0,0,0,0)",
-          0.499,
-          "rgba(0,0,0,0)",
-          0.5,
-          "rgba(249,249,249,0)",
-          1,
-          "rgb(211, 47, 47)"
-      ]
+        0, "rgba(0,0,0,0)",
+        0.499, "rgba(0,0,0,0)",
+        0.5, "rgba(249,249,249,0)",
+        1, "rgb(211, 47, 47)" // 0xd32f2f
+      ],
+      Republican_hover: [
+        0, "rgba(0,0,0,0)",
+        0.499, "rgba(0,0,0,0)",
+        0.5, "rgba(174,174,174,0.5)",
+        1, "rgb(148, 33, 33)"
+      ],
     };
-    // function colorByFraction(subgroup) {
-    //     const rgb = partyRGBColors[subgroup.name];
-    //     return ["rgba", ...rgb, ["/", ["get", this.key], ["get", this.key]]];
-    // }
 
     // also need feature to trigger this when elections are first loaded
     this.state.unitLayers.precincts.setPaintProperty(
@@ -310,22 +313,80 @@ export default class Map extends React.Component {
       [
         "case",
         [">", ["get", newElection[2]], ["get", newElection[3]]],
-          [
-              "interpolate",
-              ["linear"],
-              ["/", ["get", newElection[2]], ["+", ["get", newElection[2]], ["get", newElection[3]]]],
-              ...partyRGBColors["Democratic"]
+          ["case",
+            ["==", ["feature-state", "hover"], true],
+            [
+                "interpolate",
+                ["linear"],
+                ["/", ["get", newElection[2]], ["+", ["get", newElection[2]], ["get", newElection[3]]]],
+                ...partyRGBColors["Democratic_hover"],
+            ],
+            [
+                "interpolate",
+                ["linear"],
+                ["/", ["get", newElection[2]], ["+", ["get", newElection[2]], ["get", newElection[3]]]],
+                ...partyRGBColors["Democratic"],
+            ]
           ],
-          [
-              "interpolate",
-              ["linear"],
-              ["/", ["get", newElection[3]], ["+", ["get", newElection[2]], ["get", newElection[3]]]],
-              ...partyRGBColors["Republican"]
+          ["case",
+            ["==", ["feature-state", "hover"], true],
+            [
+                "interpolate",
+                ["linear"],
+                ["/", ["get", newElection[3]], ["+", ["get", newElection[2]], ["get", newElection[3]]]],
+                ...partyRGBColors["Republican_hover"],
+            ],
+            [
+                "interpolate",
+                ["linear"],
+                ["/", ["get", newElection[3]], ["+", ["get", newElection[2]], ["get", newElection[3]]]],
+                ...partyRGBColors["Republican"],
+            ]
           ]
       ]
     )
 
     this.setState({ selectedElection: newSelection })
+  }
+
+  paintAge() {
+    this.state.unitLayers.blockgroups.setPaintProperty(
+      "fill-color",
+      ["case",
+        ["<", ["get", "B01002_001"], 20],
+        "#edf8fb",
+        ["<", ["get", "B01002_001"], 35],
+        "#ccece6",
+        ["<", ["get", "B01002_001"], 50],
+        "#99d8c9",
+        ["<", ["get", "B01002_001"], 65],
+        "#66c2a4",
+        ["<", ["get", "B01002_001"], 80],
+        "#2ca25f",
+        "#006d2c",
+      ]
+    )
+    this.state.unitLayers.blockgroups.setPaintProperty("fill-opacity", 0.4)
+  }
+
+  paintIncome() {
+    this.state.unitLayers.blockgroups.setPaintProperty(
+      "fill-color",
+      ["case",
+        ["<", ["get", "B19013_001"], 30000],
+        "#edf8fb",
+        ["<", ["get", "B19013_001"], 60000],
+        "#ccece6",
+        ["<", ["get", "B19013_001"], 90000],
+        "#99d8c9",
+        ["<", ["get", "B19013_001"], 120000],
+        "#66c2a4",
+        ["<", ["get", "B19013_001"], 150000],
+        "#2ca25f",
+        "#006d2c"
+      ]
+    )
+    this.state.unitLayers.blockgroups.setPaintProperty("fill-opacity", 0.4)
   }
 
   switchLayer(layer_id) {
@@ -360,6 +421,14 @@ export default class Map extends React.Component {
         currentUnitLayer: selectLayer.units,
         currentColorLayer: layer_id
       })
+    }
+
+    if (selectLayer.name === "Age") {
+      this.paintAge()
+    } else if (selectLayer.name === "Income") {
+      this.paintIncome()
+    } else if (selectLayer.name === "Elections") {
+      this.changeElection()
     }
   }
 

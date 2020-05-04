@@ -54,6 +54,7 @@ export default function IncomeHistogram(props) {
   }
 
   return <div>
+    <span>Source: US Census ACS (2018)</span>
     <div className="histogram">
       {totals.map((c, kdex) => {
         let is_median = (kdex === median_point);
