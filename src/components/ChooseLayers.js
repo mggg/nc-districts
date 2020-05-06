@@ -22,6 +22,11 @@ export const dataLayers = [
     menu: 0
   },
   {
+    name: "Broadband",
+    units: "blockgroups",
+    menu: 0
+  },
+  {
     name: "Elections",
     units: "precincts",
     menu: 2

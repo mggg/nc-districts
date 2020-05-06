@@ -13,6 +13,7 @@ import EnvLegend from '../components/EnvLegend'
 import MedLegend from '../components/MedLegend'
 import UniLegend from '../components/UniLegend'
 import CoalLegend from '../components/CoalLegend'
+import BBandLegend from '../components/BBandLegend'
 
 // map management
 import Layer from '../layers/Layer'
@@ -26,6 +27,7 @@ import {
   electionColors,
   densityColors,
   rentalColors,
+  internetColors,
 } from '../colors'
 
 window.mapboxgl.accessToken = "pk.eyJ1IjoiZGlzdHJpY3RyIiwiYSI6ImNqbjUzMTE5ZTBmcXgzcG81ZHBwMnFsOXYifQ.8HRRLKHEJA0AismGk2SX2g";
@@ -338,6 +340,11 @@ export default class Map extends React.Component {
     this.state.unitLayers.blockgroups.setPaintProperty("fill-opacity", 0.4)
   }
 
+  paintBBand() {
+    this.state.unitLayers.blockgroups.setPaintProperty("fill-color", internetColors)
+    this.state.unitLayers.blockgroups.setPaintProperty("fill-opacity", 0.4)
+  }
+
   paintRace() {
     this.state.unitLayers.blockgroups.setPaintProperty(
       "fill-color",
@@ -388,6 +395,8 @@ export default class Map extends React.Component {
       this.paintRace()
     } else if (selectLayer.name === "Rental") {
       this.paintRental()
+    } else if (selectLayer.name === "Broadband") {
+      this.paintBBand()
     } else if (selectLayer.name === "Elections") {
       this.changeElection()
     }
@@ -433,6 +442,7 @@ export default class Map extends React.Component {
           {activeLayer === "Hospitals" ? <MedLegend selected={this.state.mapSelection}/> : null}
           {activeLayer === "Colleges" ? <UniLegend selected={this.state.mapSelection}/> : null}
           {activeLayer === "Coal Ash" ? <CoalLegend selected={this.state.mapSelection}/> : null}
+          {activeLayer === "Broadband" ? <BBandLegend selected={this.state.mapSelection}/> : null}
         </div>
       </div>
     </>

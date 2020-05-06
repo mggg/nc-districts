@@ -19,12 +19,18 @@ export default function IncomeHistogram(props) {
 
     totals = keys.map(x => 0)
 
-    let tot_hh = 0;
+    let tot_hh = 0
+
     selected.forEach((blockgroup) => {
+      let over_200k = blockgroup.properties.B25003_002 + blockgroup.properties.B25003_003
       keys.forEach((k, ind) => {
         totals[ind] += blockgroup.properties[k]
-        tot_hh += blockgroup.properties[k]
+        over_200k -= blockgroup.properties[k]
       })
+      if (!blockgroup.properties.B19001_017) {
+        blockgroup.properties.B19001_017 = over_200k
+        // console.log(blockgroup.properties.GEOID + ": " + over_200k)
+      }
     })
 
     let median_hh = tot_hh / 2;

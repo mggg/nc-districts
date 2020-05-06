@@ -140,8 +140,16 @@ export const rentalColors = [
   "case",
   ["==", ["+", ["get", "B25003_002"], ["get", "B25003_003"]], 0], "#ccc", // no houses
   [">", ["/", ["get", "B25003_003"], ["+", ["get", "B25003_002"], ["get", "B25003_003"]]], 0.5],
-    "orange", // > 50% rent
-  "darkblue" // 0-50% rent
+  colorAndHoverAlt("#FFA500"), // > 50% rent
+  colorAndHoverAlt("#00008B") // 0-50% rent
+]
+
+export const internetColors = [
+  "case",
+  ["==", ["get", "TOTPOP"], 0], "#ccc", // no houses
+  [">", ["/", ["get", "B28008_004"], ["get", "TOTPOP"]], 0.75],
+  colorAndHoverAlt("#FFA500"), // > 75% broadband
+  colorAndHoverAlt("#00008B") // 0-75% broadband
 ]
 
 export function electionColors(demKey, repKey) {
