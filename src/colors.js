@@ -120,11 +120,29 @@ export function densityColors(demoGroup) {
         "interpolate",
         ["linear"],
         ["/", ["get", demoGroup[1]], ["get", "TOTPOP"]],
-        ...[0, "rgba(200, 200, 255, 0)",
-        (demoGroup[2] + 0.01), "rgba(0, 0, 255, 0.6)"]
+        0,
+        ["case",
+          ["==", ["feature-state", "hover"], true],
+          "rgba(140, 140, 179, 0)",
+          "rgba(200, 200, 255, 0)",
+        ],
+        (demoGroup[2] + 0.01),
+        ["case",
+          ["==", ["feature-state", "hover"], true],
+          "rgba(0, 0, 179, 0.6)",
+          "rgba(0, 0, 255, 0.6)",
+        ],
       ]
   ]
 }
+
+export const rentalColors = [
+  "case",
+  ["==", ["+", ["get", "B25003_002"], ["get", "B25003_003"]], 0], "#ccc", // no houses
+  [">", ["/", ["get", "B25003_003"], ["+", ["get", "B25003_002"], ["get", "B25003_003"]]], 0.5],
+    "orange", // > 50% rent
+  "darkblue" // 0-50% rent
+]
 
 export function electionColors(demKey, repKey) {
   return [

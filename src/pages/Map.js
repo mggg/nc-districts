@@ -1,14 +1,18 @@
 import React from 'react'
 
 // UI components
-import ChooseLayers from '../components/ChooseLayers'
+import { dataLayers, ChooseLayers } from '../components/ChooseLayers'
+import Paintbrush from '../components/Paintbrush'
+
 import AgeHistogram from '../components/AgeHistogram'
 import IncomeHistogram from '../components/IncomeHistogram'
+import RentalLegend from '../components/RentalLegend'
 import { elections, ElectionTable } from '../components/ElectionTable'
 import { raceGroups, RaceDataBrowser } from '../components/RaceDataBrowser'
 import EnvLegend from '../components/EnvLegend'
 import MedLegend from '../components/MedLegend'
 import UniLegend from '../components/UniLegend'
+import CoalLegend from '../components/CoalLegend'
 
 // map management
 import Layer from '../layers/Layer'
@@ -21,44 +25,10 @@ import {
   incomeColors,
   electionColors,
   densityColors,
+  rentalColors,
 } from '../colors'
 
 window.mapboxgl.accessToken = "pk.eyJ1IjoiZGlzdHJpY3RyIiwiYSI6ImNqbjUzMTE5ZTBmcXgzcG81ZHBwMnFsOXYifQ.8HRRLKHEJA0AismGk2SX2g";
-
-const dataLayers = [
-  {
-    name: "Age",
-    units: "blockgroups",
-  },
-  {
-    name: "Income",
-    units: "blockgroups",
-  },
-  {
-    name: "Race",
-    units: "blockgroups",
-  },
-  {
-    name: "Elections",
-    units: "precincts",
-  },
-  {
-    name: "Environment",
-    units: "points"
-  },
-  // {
-  //   name: "Food",
-  //   units: "tracts"
-  // },
-  {
-    name: "Colleges",
-    units: "points"
-  },
-  {
-    name: "Hospitals",
-    units: "points"
-  }
-];
 
 let parts = [
   {id:0,color:"#0099cd"},
@@ -223,7 +193,7 @@ export default class Map extends React.Component {
           type: "geojson",
           data: gj
         })
-        this.state.pointLayers["Environment"] = new Layer(null, {
+        this.state.pointLayers["Emitters"] = new Layer(null, {
           id: 'enviro',
           source: 'enviro',
           type: 'circle',
@@ -261,6 +231,42 @@ export default class Map extends React.Component {
           paint: {
             'circle-radius': 4,
             'circle-color': 'red'
+          }
+        })
+      })
+
+      // NC coal
+      fetch("/nc-districts/nc-geo/nc-ccr.csv").then(res => res.text()).then(txt => {
+        let gjf = []
+        txt.split("\n").forEach((row) => {
+          // console.log(row.split(","))
+          row = row.split(",")
+          if (row.length > 1) {
+            let lat = row[row.length - 2] * 1,
+                lng = row[row.length - 1] * 1
+            gjf.push({
+              type: "Feature",
+              geometry: {
+                type: "Point",
+                coordinates: [lng, lat]
+              }
+            })
+          }
+        })
+        this.map.addSource('coal', {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: gjf
+          }
+        })
+        this.state.pointLayers["Coal Ash"] = new Layer(null, {
+          id: 'coal',
+          source: 'coal',
+          type: 'circle',
+          paint: {
+            'circle-radius': 4,
+            'circle-color': 'black'
           }
         })
       })
@@ -327,6 +333,11 @@ export default class Map extends React.Component {
     this.state.unitLayers.blockgroups.setPaintProperty("fill-opacity", 0.4)
   }
 
+  paintRental() {
+    this.state.unitLayers.blockgroups.setPaintProperty("fill-color", rentalColors)
+    this.state.unitLayers.blockgroups.setPaintProperty("fill-opacity", 0.4)
+  }
+
   paintRace() {
     this.state.unitLayers.blockgroups.setPaintProperty(
       "fill-color",
@@ -375,6 +386,8 @@ export default class Map extends React.Component {
       this.paintIncome()
     } else if (selectLayer.name === "Race") {
       this.paintRace()
+    } else if (selectLayer.name === "Rental") {
+      this.paintRental()
     } else if (selectLayer.name === "Elections") {
       this.changeElection()
     }
@@ -386,12 +399,14 @@ export default class Map extends React.Component {
     return <>
       <div className="options">
         <ChooseLayers
-          labels={dataLayers}
           switchLayer={this.switchLayer.bind(this)}
           disabled={!this.state.mapLoaded}
         />
       </div>
-      <div className="map" ref="map">
+      <div className="mapContainer">
+        <Paintbrush/>
+        <div className="map" ref="map">
+        </div>
       </div>
       <div className="legend">
         <div className="outputs">
@@ -399,6 +414,7 @@ export default class Map extends React.Component {
           <br/>
           {activeLayer === "Age" ? <AgeHistogram selected={this.state.mapSelection}/> : null}
           {activeLayer === "Income" ? <IncomeHistogram selected={this.state.mapSelection}/> : null}
+          {activeLayer === "Rental" ? <RentalLegend selected={this.state.mapSelection}/> : null}
           {activeLayer === "Elections" ?
             <ElectionTable
               selected={this.state.mapSelection}
@@ -413,9 +429,10 @@ export default class Map extends React.Component {
               changeFocus={this.changeFocus.bind(this)}
               />
             : null}
-          {activeLayer === "Environment" ? <EnvLegend selected={this.state.mapSelection}/> : null}
+          {activeLayer === "Emitters" ? <EnvLegend selected={this.state.mapSelection}/> : null}
           {activeLayer === "Hospitals" ? <MedLegend selected={this.state.mapSelection}/> : null}
           {activeLayer === "Colleges" ? <UniLegend selected={this.state.mapSelection}/> : null}
+          {activeLayer === "Coal Ash" ? <CoalLegend selected={this.state.mapSelection}/> : null}
         </div>
       </div>
     </>

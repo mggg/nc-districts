@@ -205,6 +205,8 @@ for county in county_fips:
 
         ## "B01002_001E", # median age
         ## "B19013_001E", # median household income
+        "B25003_002E", # owner occupied
+        "B25003_003E" # renter occupied
     ]
 
     url = 'https://api.census.gov/data/2018/acs/acs5?get=' + ','.join(cols) + '&for=block group:*&in=state:' + state + '+county:' + county + '&key=' + api_key

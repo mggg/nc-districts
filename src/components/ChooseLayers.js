@@ -1,6 +1,58 @@
 import React from 'react'
 
-export default class ChooseLayers extends React.Component {
+export const dataLayers = [
+  {
+    name: "Age",
+    units: "blockgroups",
+    menu: 0
+  },
+  {
+    name: "Income",
+    units: "blockgroups",
+    menu: 0
+  },
+  {
+    name: "Race",
+    units: "blockgroups",
+    menu: 0
+  },
+  {
+    name: "Rental",
+    units: "blockgroups",
+    menu: 0
+  },
+  {
+    name: "Elections",
+    units: "precincts",
+    menu: 2
+  },
+  {
+    name: "Emitters",
+    units: "points",
+    menu: 1
+  },
+  {
+    name: "Coal Ash",
+    units: "points",
+    menu: 1
+  },
+  // {
+  //   name: "Food",
+  //   units: "tracts"
+  // },
+  {
+    name: "Colleges",
+    units: "points",
+    menu: 1
+  },
+  {
+    name: "Hospitals",
+    units: "points",
+    menu: 1
+  }
+];
+
+export class ChooseLayers extends React.Component {
   constructor(props) {
     super();
 
@@ -11,29 +63,31 @@ export default class ChooseLayers extends React.Component {
     this.clickTest = this.clickTest.bind(this);
   }
 
-  clickTest (event, index) {
+  clickTest (event, label) {
     event.preventDefault();
     if (!this.props.disabled) {
-      this.setState({ selectItem: index });
-      this.props.switchLayer(index);
+      this.setState({ selectItem: dataLayers.indexOf(label) });
+      this.props.switchLayer(dataLayers.indexOf(label));
     }
   }
 
   render () {
-    return <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
+    return <nav className="navbar navbar-expand-lg" style={{borderBottom: "2px solid silver"}}>
       <ul className="navbar-nav mr-auto">
-        {this.props.labels.map((label, i) =>
-          <li className="nav-item" key={i}>
-            <a
-              className={"nav-link " +
-                ((i === this.state.selectItem) ? "active" : "")}
-              href="#"
-              onClick={(e) => { this.clickTest(e, i) }}
-            >
-              {label.name}
+        {["Demographics", "Points", "Elections"].map((menu, m) =>
+          <li className="nav-item dropdown" key={m}>
+            <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              {menu}
             </a>
-          </li>)
-        }
+            <div className="dropdown-menu" aria-labelledby="navbarDropdown">
+              {dataLayers.filter(label => (label.menu === m)).map((label, i) =>
+                <a key={i} className="dropdown-item" href="#" onClick={(e) => { this.clickTest(e, label) }}>
+                  {label.name}
+                </a>
+              )}
+            </div>
+          </li>
+        )}
       </ul>
     </nav>
   }
