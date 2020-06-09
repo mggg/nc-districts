@@ -3,55 +3,58 @@ import React from 'react'
 // map management
 import Layer from '../layers/Layer'
 // import { HoverWithRadius } from '../layers/Hover'
+import { densityColors } from '../colors'
+import { raceGroups } from '../components/RaceDataBrowser'
+
 
 window.mapboxgl.accessToken = "pk.eyJ1IjoiZGlzdHJpY3RyIiwiYSI6ImNqbjUzMTE5ZTBmcXgzcG81ZHBwMnFsOXYifQ.8HRRLKHEJA0AismGk2SX2g";
 
 const city_configs = [
   {
     name: "Charlotte",
-    center: [-80.9073009, 35.2119091],
+    center: [-80.8428907, 35.2241038],
     zoom: 9
   },
   {
     name: "Raleigh",
-    center: [-78.6902118, 35.8221152],
-    zoom: 9
+    center: [-78.6394881, 35.7780928],
+    zoom: 10
   },
 
   {
     name: "Greensboro",
-    center: [-79.8936405, 36.0808962],
+    center: [-79.794579, 36.0728101],
     zoom: 9
   },
   {
     name: "Durham",
-    center: [-78.9644001, 35.9893843],
+    center: [-78.9068315, 35.99429],
     zoom: 9
   },
   {
     name: "Winston-Salem",
-    center: [-80.322947, 36.1079573],
+    center: [-80.2495087, 36.0971022],
     zoom: 9
   },
   {
     name: "Fayetteville",
-    center: [-79.0080239, 35.0717055],
+    center: [-78.880853, 35.0517772],
     zoom: 9
   },
   {
     name: "Cary",
-    center: [-78.8826751, 35.7693799],
-    zoom: 9.5
+    center: [-78.7847445, 35.7839415],
+    zoom: 10
   },
   {
     name: "Wilmington",
-    center: [-77.9131854, 34.2130073],
-    zoom: 9.5
+    center: [-77.8971587, 34.20855],
+    zoom: 10
   },
   {
     name: "High Point",
-    center: [-80.0280459, 35.9723156],
-    zoom: 9.5
+    center: [-80.0104744, 35.9557965],
+    zoom: 10
   },
 ]
 
@@ -61,7 +64,8 @@ export default class Grid extends React.Component {
 
     this.state = {
       mapLoaded: false,
-      layer: "federal"
+      layer: "federal",
+      selectDemo: -1
     }
     this.showBorder = this.showBorder.bind(this)
     this.layers = {
@@ -73,9 +77,10 @@ export default class Grid extends React.Component {
 
   componentDidMount() {
     this.maps = []
+    this.fillPrecincts = []
 
     fetch("/nc-districts/nc-geo/current_districts.geojson").then(res => res.json()).then((gj) => {
-    fetch("/nc-districts/nc-geo/state_house_districts.geojson").then(res => res.json()).then((state_house) => {
+    fetch("/nc-districts/nc-geo/state_house_districts.geojson?r2").then(res => res.json()).then((state_house) => {
     fetch("/nc-districts/nc-geo/state_senate_districts.geojson").then(res => res.json()).then((state_senate) => {
 
       city_configs.forEach((city, i) => {
@@ -143,7 +148,7 @@ export default class Grid extends React.Component {
             type: "vector",
             url: "mapbox://districtr.nc_precincts"
           })
-          let borderPrecincts = new Layer(map, {
+          new Layer(map, {
             id: 'precincts-borders',
             source: 'precincts',
             'source-layer': 'nc_precincts',
@@ -154,16 +159,16 @@ export default class Grid extends React.Component {
               "line-opacity": 0.3
             }
           })
-          // let fillPrecincts = new Layer(null, { // don't add to map right now
-          //   id: 'precincts',
-          //   source: 'precincts',
-          //   'source-layer': 'nc_precincts',
-          //   type: 'fill',
-          //   paint: {
-          //     "fill-color": "#ccc",
-          //     "fill-opacity": 0.3
-          //   }
-          // })
+          this.fillPrecincts.push(new Layer(map, {
+            id: 'precincts',
+            source: 'precincts',
+            'source-layer': 'nc_precincts',
+            type: 'fill',
+            paint: {
+              "fill-color": "#ccc",
+              "fill-opacity": 0
+            }
+          }))
           // let cursorPrecincts = new HoverWithRadius(
           //   fillPrecincts,
           //   20,
@@ -178,9 +183,6 @@ export default class Grid extends React.Component {
 
   }
 
-  switchLayer(layer_id) {
-  }
-
   showBorder(layerName) {
     this.layers[this.state.layer].forEach((lyr) => {
       lyr.setOpacity(0)
@@ -193,60 +195,99 @@ export default class Grid extends React.Component {
     this.setState({ layer: layerName })
   }
 
+  changeDemo (e) {
+    // console.log(e.target.value)
+    let selectDemo = e.target.value;
+    this.fillPrecincts.forEach((lyr) => {
+      if (selectDemo * 1 == -1) {
+        lyr.setOpacity(0)
+      } else {
+        lyr.setPaintProperty(
+          "fill-color",
+          densityColors(raceGroups[selectDemo])
+        )
+        lyr.setOpacity(0.45)
+      }
+    })
+    this.setState({ selectDemo: selectDemo })
+  }
+
   render() {
     return <>
       <div className="options">
         <label>
           <input type="radio" name="districts" checked={this.state.layer === "federal"} value="fed" onChange={(e) => { this.showBorder("federal")}}/>
-          US Congress
+          <span>US Congress</span>
         </label>
         <label>
           <input type="radio" name="districts" checked={this.state.layer === "senate"} value="senate" onChange={(e) => { this.showBorder("senate")}}/>
-          State Senate
+          <span>State Senate</span>
         </label>
         <label>
           <input type="radio" name="districts" checked={this.state.layer === "house"} value="house" onChange={(e) => { this.showBorder("house")}}/>
-          State House
+          <span>State House</span>
+        </label>
+        <label>
+          <select value={this.state.selectDemo} onChange={this.changeDemo.bind(this)}>
+            <option value="-1">By Precinct</option>
+            <option value="0">White</option>
+            <option value="1">Black</option>
+            <option value="2">Hispanic</option>
+            <option value="3">Asian</option>
+            <option value="4">American Indian</option>
+            <option value="5">Native Hawaiian / Pacific Islander</option>
+            <option value="6">Other</option>
+            <option value="7">Two or more</option>
+          </select>
         </label>
       </div>
       <div className="map-row">
         <div className="map-cell">
+          <h4>{city_configs[0].name}</h4>
           <div className="map-square" ref="map0">
           </div>
         </div>
         <div className="map-cell">
+          <h4>{city_configs[1].name}</h4>
           <div className="map-square" ref="map1">
           </div>
         </div>
         <div className="map-cell">
+          <h4>{city_configs[2].name}</h4>
           <div className="map-square" ref="map2">
           </div>
         </div>
       </div>
       <div className="map-row">
         <div className="map-cell">
+          <h4>{city_configs[3].name}</h4>
           <div className="map-square" ref="map3">
           </div>
         </div>
         <div className="map-cell">
+          <h4>{city_configs[4].name}</h4>
           <div className="map-square" ref="map4">
           </div>
         </div>
         <div className="map-cell">
+          <h4>{city_configs[5].name}</h4>
           <div className="map-square" ref="map5">
           </div>
         </div>
       </div>
       <div className="map-row">
         <div className="map-cell">
+          <h4>{city_configs[6].name}</h4>
           <div className="map-square" ref="map6">
           </div>
         </div>
         <div className="map-cell">
+          <h4>{city_configs[7].name}</h4>
           <div className="map-square" ref="map7">
           </div>
         </div>
         <div className="map-cell">
+          <h4>{city_configs[8].name}</h4>
           <div className="map-square" ref="map8">
           </div>
         </div>
